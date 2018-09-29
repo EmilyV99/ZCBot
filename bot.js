@@ -1,6 +1,7 @@
 const Discord = require("discord.js");
 const client = new Discord.Client();
 const SERVER = "361606929610702848";
+const LOGGING = "495625599189254174";
 /*time consts
 const hour = 3600000;
 const halfhr = 1800000;
@@ -11,6 +12,7 @@ const TOGGLFLAGS = true;
 const UNIQUEFLAGS = true;
 const ID_ZORIA = 316187823403171840;
 const ID_VENROB = 242422436262313986;
+const P_BOTTEST = 6;
 const P_OWNER = 5;
 const P_ADMIN = 4;
 const P_CONTRIBUTOR = 3;
@@ -20,18 +22,19 @@ const P_DEFAULT = 0;
 const PR_ICON = 4;
 const PR_ICHELP = PR_ICON;
 //               0            1              2               3              4               5              6             7        8        9         10             11          //
-//               new bug      unconf'd bg    verif'd bug     crashing       critical        treated        p. fixed      v.fixd   closed   notbug    needs rule     needsrule 2 //
+//               new bug      unconf'd bg    verif'd bug     crashing       critical        treated        p. fixed      v.fixd   closed   notbug    needs rule2     needsrule  //
 var flags = ["\uD83D\uDC1B","\uD83D\uDE48","\uD83D\uDC1E","\uD83D\uDCA3","\uD83D\uDC7F","\uD83D\uDC8A",	"\uD83D\uDEA5",	"\u2705","\u2B55","\u274C","\uD83D\uDCDC","\uD83D\uDCD0",
 //             12     REP      13                14 REP      15          16           17             18     BAD     19              20            21              22
-//             mechanical      enemies           items       timing      examine      historical     controlany     controlgpad     audio         music/midi      saving
-            "\uD83D\uDD27",	"\uD83D\uDC7E",	"\uD83C\uDFF9",	"\u23F1","\uD83D\uDD2C","\uD83D\uDD2E","\uD83D\uDD79","\uD83C\uDFAE","\uD83D\uDD0A","\uD83C\uDFB5","\uD83D\uDCBE",
-//          23            24             25            26              27             28         29  BAD //  30             31                  32              33
-//          wat/swim      link           tiles         combos          flags          lens       balance //  pinned         all-nighter         stress          locked
-			"\u2693","\uD83E\uDDDD","\uD83C\uDC04","\uD83C\uDF54","\uD83C\uDF8C","\uD83D\uDD0D","\u2696","\uD83D\uDCCC","\uD83D\uDEAC\u2615","\uD83C\uDF7A","\uD83D\uDD12",
-//             34               35            36          37      38           39           40                41
-//             readylock        moyai         toilet      p.a.m.  question     bait         spaghetti         snake
-			"\uD83D\uDD13","\uD83D\uDDFF","\uD83D\uDEBD","\u303D","\u2753","\uD83C\uDF56","\uD83C\uDF5D","\uD83D\uDC0D"];
+//             mechanical      enemies           items       timing      examine      historical     controlany     controlgpad     audio         music/midi      visual
+            "\uD83D\uDD27",	"\uD83D\uDC7E",	"\uD83C\uDFF9",	"\u23F1","\uD83D\uDD2C","\uD83D\uDD2E","\uD83D\uDD79","\uD83C\uDFAE","\uD83D\uDD0A","\uD83C\uDFB5","\uD83D\uDC40",
+//             23          24            25             26            27              28             29         30  BAD //  31             32                  33
+//             saving      wat/swim      link           tiles         combos          flags          lens       balance //  pinned         all-nighter         stress
+			"\uD83D\uDCBE","\u2693","\uD83E\uDDDD","\uD83C\uDC04","\uD83C\uDF54","\uD83C\uDF8C","\uD83D\uDD0D","\u2696","\uD83D\uDCCC","\uD83D\uDEAC\u2615","\uD83C\uDF7A",
+//               34           35               36            37          38      39           40           41                42
+//               locked       readylock        moyai         toilet      p.a.m.  question     bait         spaghetti         snake
+			"\uD83D\uDD12","\uD83D\uDD13","\uD83D\uDDFF","\uD83D\uDEBD","\u303D","\u2753","\uD83C\uDF56","\uD83C\uDF5D","\uD83D\uDC0D"];
 var flagprio = [30,7,8,6,5,2,1,9,4,3,0,10,11,/**/31,32,33,34,35,36,37,38,39,40,41,/**/16,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29];
+
 function insufPerms(message, param){
 	//message.delete(1);
 	//message.author.createDM().then(dm=>{dm.send("Insufficient permissions for command \"!"+param+"\"!")}).catch(console.error);
@@ -44,13 +47,13 @@ function flaghelp(){
 	"verified: `"+flags[2]+"`\n"+
 	"crash, crashes, horrific: `"+flags[3]+"`\n"+
 	"urgent, critical: `"+flags[4]+"`\n"+
-	"treated: `"+flags[5]+"`\n"+
+	"treated, sick: `"+flags[5]+"`\n"+
 	"pfixed, potential: `"+flags[6]+"`\n"+
 	"fixed, vfixed: `"+flags[7]+"`\n"+
 	"closed, close: `"+flags[8]+"`\n"+
 	"nonbug, notbug, nobug: `"+flags[9]+"`\n"+
-	"rule, needsrule: `"+flags[10]+"`\n"+
-	"rule2, needsrule2: `"+flags[11]+"`\n"+
+	"rule2, needsrule2: `"+flags[10]+"`\n"+
+	"rule, needsrule: `"+flags[11]+"`\n"+
 	"mech, mechanical: `"+flags[12]+"`\n"+
 	"enemy, enemies: `"+flags[13]+"`\n"+
 	"item, items: `"+flags[14]+"`\n"+
@@ -61,39 +64,41 @@ function flaghelp(){
 	"controller, gamepad: `"+flags[19]+"`\n"+
 	"audio, sound, sfx: `"+flags[20]+"`\n"+
 	"music, midi: `"+flags[21]+"`\n"+
-	"saving, save: `"+flags[22]+"`\n"+
-	"water, swimming, swim: `"+flags[23]+"`\n"+
-	"link: `"+flags[24]+"`\n"+
-	"tiles, tile: `"+flags[25]+"`\n"+
-	"combo, combos: `"+flags[26]+"`\n"+
-	"flag, flags: `"+flags[27]+"`\n"+
-	"lens, lensoftruth: `"+flags[28]+"`\n"+
-	"balance, balancing: `"+flags[29]+"`\n"+
-	"pin: `"+flags[30]+"`\n"+
-	"all-nighter, all-night, night: `"+flags[31]+"`\n"+
-	"stress, stressed: `"+flags[32]+"`\n"+
-	"lock: `"+flags[33]+"`\n"+
-	"readylock: `"+flags[34]+"`\n"+
-	"moyai: `"+flags[35]+"`\n"+
-	"toilet, loo: `"+flags[36]+"`\n"+
-	"m, part-alternation-mark: `"+flags[37]+"`\n"+
-	"?, help: `"+flags[38]+"`\n"+
-	"bait: `"+flags[39]+"`\n"+
-	"spaghetti, spagh, mess: `"+flags[40]+"`\n"+
-	"snake: `"+flags[41] + "`";
+	"graphics, visual, gfx: `"+flags[22]+"`\n"+
+	"saving, save: `"+flags[23]+"`\n"+
+	"water, swimming, swim: `"+flags[24]+"`\n"+
+	"link: `"+flags[25]+"`\n"+
+	"tiles, tile: `"+flags[26]+"`\n"+
+	"combo, combos: `"+flags[27]+"`\n"+
+	"flag, flags: `"+flags[28]+"`\n"+
+	"lens, lensoftruth: `"+flags[29]+"`\n"+
+	"balance, balancing: `"+flags[30]+"`\n"+
+	"Dev-Only: pin: `"+flags[31]+"`\n"+
+	"all-nighter, all-night, night: `"+flags[32]+"`\n"+
+	"stress, stressed: `"+flags[33]+"`\n"+
+	"Dev-Only: lock: `"+flags[34]+"`\n"+
+	"readylock: `"+flags[35]+"`\n"+
+	"moyai, moai: `"+flags[36]+"`\n"+
+	"toilet, loo: `"+flags[37]+"`\n"+
+	"m, part-alternation-mark: `"+flags[38]+"`\n"+
+	"?, help: `"+flags[39]+"`\n"+
+	"bait: `"+flags[40]+"`\n"+
+	"spaghetti, spagh, mess: `"+flags[41]+"`\n"+
+	"snake: `"+flags[42] + "`";
 }
 
-function runflags(chan, params){
+function runflags(chan, params, perms){
 	var chanName = chan.name;
 	for(var i = 1; i < params.length; i++){
 		var arg = params[i];
 		var fl = "";
 		if(isNaN(Number.parseInt(arg))){
-			fl = stringToFlag(arg);
+			fl = stringToFlag(arg,perms);
 		} else {
 			var index = Number.parseInt(arg) - 1;
 			if(index<flags.length && index > -1){
-				fl = flags[index];
+				if((index!=34 && index!=31)||perms>=4)//Lock and Pinned are Dev+ only
+					fl = flags[index];
 			} else {
 				console.log("Flag index " + index + " is invalid!")
 			}
@@ -151,18 +156,18 @@ function checkExclusivities(name, flag){
 			name = name.replace(new RegExp(flags[5],'g'),"").replace(new RegExp(flags[6],'g'),"");
 			break;
 		//Lock, Ready To Lock
-		case flags[33]:
-			name = name.replace(new RegExp(flags[34],'g'),"");
-			break;
 		case flags[34]:
-			name = name.replace(new RegExp(flags[33],'g'),"");
+			name = name.replace(new RegExp(flags[35],'g'),"");
+			break;
+		case flags[35]:
+			name = name.replace(new RegExp(flags[34],'g'),"");
 			break;
 		//
 	}
 	return name;
 }
 
-function stringToFlag(flag){
+function stringToFlag(flag, perms){
 	switch(flag.toLowerCase()){
 		case "new":
 			return flags[0];
@@ -174,7 +179,7 @@ function stringToFlag(flag){
 			return flags[3];
 		case "urgent": case "critical":
 			return flags[4];
-		case "treated":
+		case "treated": case "sick":
 			return flags[5];
 		case "pfixed": case "potential":
 			return flags[6];
@@ -184,9 +189,9 @@ function stringToFlag(flag){
 			return flags[8];
 		case "nonbug": case "notbug": case "nobug":
 			return flags[9];
-		case "rule": case "needsrule":
-			return flags[10];
 		case "rule2": case "needsrule2":
+			return flags[10];
+		case "rule": case "needsrule":
 			return flags[11];
 		case "mech": case "mechanical":
 			return flags[12];
@@ -208,46 +213,50 @@ function stringToFlag(flag){
 			return flags[20];
 		case "music": case "midi":
 			return flags[21];
-		case "saving": case "save":
+		case "graphics": case "gfx": case "visual":
 			return flags[22];
-		case "water": case "swimming": case "swim":
+		case "saving": case "save":
 			return flags[23];
-		case "link":
+		case "water": case "swimming": case "swim":
 			return flags[24];
-		case "tiles": case "tile":
+		case "link":
 			return flags[25];
-		case "combo": case "combos":
+		case "tiles": case "tile":
 			return flags[26];
-		case "flag": case "flags":
+		case "combo": case "combos":
 			return flags[27];
-		case "lens": case "lensoftruth":
+		case "flag": case "flags":
 			return flags[28];
-		case "balance": case "balancing":
+		case "lens": case "lensoftruth":
 			return flags[29];
-		case "pin":
+		case "balance": case "balancing":
 			return flags[30];
-		case "all-nighter": case "all-night": case "allnighter": case "allnight": case "night": case "all_nighter": case "all_night":
+		case "pin":
+			if(perms<4)return "";
 			return flags[31];
-		case "stress": case "stressed":
+		case "all-nighter": case "all-night": case "allnighter": case "allnight": case "night": case "all_nighter": case "all_night":
 			return flags[32];
-		case "lock":
+		case "stress": case "stressed":
 			return flags[33];
-		case "readylock":
+		case "lock":
+			if(perms<4)return "";
 			return flags[34];
-		case "moyai":
+		case "readylock":
 			return flags[35];
-		case "toilet": case "loo":
+		case "moyai": case "moai":
 			return flags[36];
-		case "m": case "partalternationmark": case "part_alternation_mark": case "part-alternation-mark": 
+		case "toilet": case "loo":
 			return flags[37];
-		case "?": case "help":
+		case "m": case "partalternationmark": case "part_alternation_mark": case "part-alternation-mark": 
 			return flags[38];
-		case "bait":
+		case "?": case "help":
 			return flags[39];
-		case "spaghetti": case "spagh": case "mess":
+		case "bait":
 			return flags[40];
-		case "snake":
+		case "spaghetti": case "spagh": case "mess":
 			return flags[41];
+		case "snake":
+			return flags[42];
 		default:
 			console.log("Flag `" + flag + "` not parsed!");
 			return "";
@@ -255,9 +264,11 @@ function stringToFlag(flag){
 }
 
 function hasperms(member, permreq){
-	if(member.id==ID_ZORIA){
+	if(member.roles.find("name","Founder")){
+		return permreq<=P_BOTTEST;
+	} else if(member.id==ID_ZORIA){
 		return permreq<=P_OWNER;
-	} else if(member.roles.find("name","Developers") || member.roles.find("name","Founder")){
+	} else if(member.roles.find("name","Developers") || member.id==ID_VENROB){
 		return permreq<=P_ADMIN;
 	} else if(member.roles.find("name","Contributors")){
 		return permreq<=P_CONTRIBUTOR;
@@ -281,6 +292,7 @@ client.on("message", (message) => {
 		{
 			//var roles = client.channels.get(pings).server.roles;
 			var fullCmd = message.content.substring(1,message.content.length+1).toLowerCase();
+			//message.channel.send("LOGGING TEST: " + message.author.tag + " sent: " + message.content + "\nIn channel named: `" + message.channel.name + "`");
 			var params = fullCmd.split(' ');
 			switch(params[0])
 			{
@@ -304,7 +316,7 @@ client.on("message", (message) => {
 				case "icon":
 				case "addflags":
 				case "addicon":
-					if(hasperms(message.member,PR_ICON)){
+					if(hasperms(message.member,PR_ICON)/* && message.channel.permissionsFor(message.member).has("MANAGE_CHANNELS",false)*/){
 						runflags(message.channel, params);
 						message.delete(1);
 					} else {
@@ -317,11 +329,14 @@ client.on("message", (message) => {
 					if(hasperms(message.member,PR_ICHELP)){
 						message.member.send(flaghelp());
 						message.delete(1);
+					} else {
+						insufPerms(message,params[0]);
 					}
 					break;
 				default:
 					//message.delete(1);
 			}
+			client.channels.get(LOGGING).send("user " + message.author.tag + " sent command " + message.content + " in channel `" + message.channel.name + "`");
 			//console.log("\"!" + fullCmd + "\" Completed for user " + message.author.tag);
 		}
 	} catch(err){console.log("Error: " + err.message)};
