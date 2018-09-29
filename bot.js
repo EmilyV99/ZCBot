@@ -263,6 +263,42 @@ function stringToFlag(flag, perms){
 	}
 }
 
+function newBugReport(message, command, perms){
+	var lines = command.split('\n');
+	var icons = "";
+	var title = "";
+	var post = "";
+	var skipicon = false;
+	for(var i = 0; i<lines.length; i++){
+		var params = lines[i].split(' ');
+		for(var j = 0; j<params.length; j++){
+			if(params[0]=="bug"){
+				if(j==0)continue;
+				if(j==1){
+					title=params[j];
+				} else {
+					title+= "-" + params[j];
+				}
+			} else if(params[0].toLowerCase()=="icon"&&!skipicon){
+				icons = lines[i];
+				skipicon=true;
+				break;
+			} else {
+				if(post=="")post=params[j];
+				else if(j==0)post += "\n" + params[j];
+				else post += " " + params[j];
+				skipicon=true;
+			}
+		}
+	}
+	title = title.toLowerCase();
+	message.guild.createChannel(title,"text").then((channel) => {
+		runflags(channel,icons.split(' '),perms);
+		channel.send(post);
+	});
+	//add channel to category. Should go to Bug Reports; auto sorting by flags could be added to runflags() though...
+}
+
 function hasperms(member, permreq){
 	if(member.roles.find("name","Founder")){
 		return permreq<=P_BOTTEST;
@@ -277,6 +313,22 @@ function hasperms(member, permreq){
 	} else if(member.roles.find("name","ZC Users")){
 		return permreq<=P_ZC;
 	} else return permreq<=P_DEFAULT;
+}
+
+function getperms(member){
+	if(member.roles.find("name","Founder")){
+		return P_BOTTEST;
+	} else if(member.id==ID_ZORIA){
+		return P_OWNER;
+	} else if(member.roles.find("name","Developers") || member.id==ID_VENROB){
+		return P_ADMIN;
+	} else if(member.roles.find("name","Contributors")){
+		return P_CONTRIBUTOR;
+	} else if(member.roles.find("name","Testers")){
+		return P_TESTER;
+	} else if(member.roles.find("name","ZC Users")){
+		return P_ZC;
+	} else return P_DEFAULT;
 }
 
 client.on("ready", () => {
@@ -317,7 +369,7 @@ client.on("message", (message) => {
 				case "addflags":
 				case "addicon":
 					if(hasperms(message.member,PR_ICON)/* && message.channel.permissionsFor(message.member).has("MANAGE_CHANNELS",false)*/){
-						runflags(message.channel, params);
+						runflags(message.channel, params,getperms(message.member));
 						message.delete(1);
 					} else {
 						insufPerms(message,params[0]);
@@ -333,6 +385,14 @@ client.on("message", (message) => {
 						insufPerms(message,params[0]);
 					}
 					break;
+				case "bug":
+					if(hasperms(message.member,6)){
+						newBugReport(message, message.content.substr(1),getperms(message.member));
+						message.delete(1);
+					} else {
+						insufPerms(message,params[0]);
+					}
+					return;
 				default:
 					//message.delete(1);
 			}
